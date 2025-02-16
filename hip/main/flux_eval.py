@@ -65,9 +65,13 @@ class CustomFluxSingleAttnProcessor2_0:
 
         # the output of sdp = (batch, num_heads, seq_len, head_dim)
         # TODO: add support for attn.scale when we move to Torch 2.1
-        # hidden_states = F.scaled_dot_product_attention(query, key, value, dropout_p=0.0, is_causal=False)
-        print(query.shape, key.shape, value.shape)
-        hidden_states, _ = hip_attention(query.transpose(1, 2) / math.sqrt(query.shape[-1]), key.transpose(1, 2), value.transpose(1, 2), args=HiPAttentionArgs(mask_k=256))
+        scale = attn.scale if hasattr(attn, 'scale') else 1.0
+        hidden_states, _ = hip_attention(
+            query.transpose(1, 2) / (math.sqrt(query.shape[-1]) / scale), 
+            key.transpose(1, 2), 
+            value.transpose(1, 2), 
+            args=HiPAttentionArgs(mask_k=256)
+        )
         hidden_states = hidden_states.transpose(1, 2)
 
         hidden_states = hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
