@@ -1,7 +1,7 @@
-import random
 import datasets
 from torch.utils.data import Dataset
 from tqdm import tqdm
+import secrets
 
 
 class OpenWebTextDataset(Dataset):
@@ -19,7 +19,7 @@ class OpenWebTextDataset(Dataset):
         for i in range(self.window_size):
             entry = self.dataset[idx * self.window_size + i]
             text.append(entry['text'])
-        random.shuffle(text)
+        secrets.SystemRandom().shuffle(text)
         ids = self.tokenizer("\n\n".join(text), return_tensors='pt', truncation=True, max_length=self.stride).input_ids
         labels = ids.clone()
         labels[:, :-1] = ids[:, 1:]

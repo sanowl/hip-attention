@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from importlib import metadata
 import nvtx
 import cupy as cp
-import random, os
+import os
 import warnings
 import tqdm
 import triton
@@ -39,6 +39,8 @@ import numpy as np
 from numpy import ndarray as NdArray
 import math
 from hip.utils.triton_argsort import argsort as tl_argsort
+import secrets
+
 try:
     from vllm_flash_attn import flash_attn_func, flash_attn_with_kvcache
 except ImportError:
@@ -4233,7 +4235,7 @@ def masking_iteration_draft(
             MAX_BSRC,
             mask_block_k, 
             HID,
-            random.randint(0, 1024*1024),
+            secrets.SystemRandom().randint(0, 1024*1024),
             args.sample_method,
             args.branch_method,
             KV_HEAD_REPEAT,
@@ -4298,7 +4300,7 @@ def masking_iteration_draft(
                 sliding_window_size,
                 
                 G, TDST, TSRC, mask_block_k, HID,
-                random.randint(0, 1024*1024),
+                secrets.SystemRandom().randint(0, 1024*1024),
                 sample_method,
                 branch_method,
                 

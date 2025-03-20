@@ -1,6 +1,7 @@
 from datasets import load_dataset, load_metric
-import random, torch
+import torch
 import os
+import secrets
 
 TASK_TO_VALID = {
     "cola": "validation",
@@ -49,7 +50,7 @@ def get_dataloader(subset, tokenizer, batch_size, split='train', encode_batch_si
     
     if split.startswith('train'): #shuffle when train set
         dataset = dataset.sort('label')
-        dataset = dataset.shuffle(seed=random.randint(0, 10000))
+        dataset = dataset.shuffle(seed=secrets.SystemRandom().randint(0, 10000))
     dataset = dataset.map(lambda examples: {'labels': examples['label']}, batched=True, batch_size=encode_batch_size)
     dataset = dataset.map(encode, batched=True, batch_size=encode_batch_size)
     dataset.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'labels'])

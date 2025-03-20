@@ -4,7 +4,6 @@ import math
 import threading
 import time
 import os
-import random
 import traceback
 import numpy as np
 import torch, transformers
@@ -26,6 +25,7 @@ from hip.dataset.calib_loft_retrieval import (
 )
 from hip import HiPAttentionArgs11
 import matplotlib.pyplot as plt
+import secrets
 
 def load_loft_rag_chat_corpus() -> List[Tuple[str, str]]:
     lines = []
@@ -57,7 +57,7 @@ def load_infinite_bench_subset(split: str, tokenizer, seq_len: int, count: int):
     
     lines = []
     for idx in range(min(count, len(dataset[split]))):
-        entry = dataset[split][random.randint(0, len(dataset[split]) - 1)]
+        entry = dataset[split][secrets.SystemRandom().randint(0, len(dataset[split]) - 1)]
         context = f"""You are a helpful assistant.
 
 Please read given text careful and answer user\'s query after it.
@@ -386,7 +386,7 @@ def job_ga(
     def mutate_inner(p):
         p = copy.deepcopy(p)
         
-        stage_job = random.choice([
+        stage_job = secrets.choice([
             'pass', 
             'swap_layer', 
             'swap_stage',
@@ -396,40 +396,40 @@ def job_ga(
         if stage_job == 'pass':
             pass
         elif stage_job == 'swap_layer':
-            a = random.randint(0, len(p) - 1)
-            b = random.randint(0, len(p) - 1)
+            a = secrets.SystemRandom().randint(0, len(p) - 1)
+            b = secrets.SystemRandom().randint(0, len(p) - 1)
             layer_a = p[a]
             layer_b = p[b]
             p[a] = layer_b
             p[b] = layer_a
         elif stage_job == 'swap_stage':
-            target_layer = random.randint(0, len(p) - 1)
+            target_layer = secrets.SystemRandom().randint(0, len(p) - 1)
             layer = p[target_layer]['stages']
             if len(layer) > 2:
-                a = random.randint(1, len(layer) - 1)
-                b = random.randint(1, len(layer) - 1)
+                a = secrets.SystemRandom().randint(1, len(layer) - 1)
+                b = secrets.SystemRandom().randint(1, len(layer) - 1)
                 stage_a = layer[a]
                 stage_b = layer[b]
                 layer[a] = stage_b
                 layer[b] = stage_a
         elif stage_job == 'copy_stage':
-            target_layer = random.randint(0, len(p) - 1)
+            target_layer = secrets.SystemRandom().randint(0, len(p) - 1)
             layer = p[target_layer]['stages'] # type: list
             if len(layer) > 2:
-                a = random.randint(1, len(layer) - 1)
+                a = secrets.SystemRandom().randint(1, len(layer) - 1)
                 stage = layer[a]
                 layer.insert(a, copy.deepcopy(stage))
         elif stage_job == 'drop_stage':
-            target_layer = random.randint(0, len(p) - 1)
+            target_layer = secrets.SystemRandom().randint(0, len(p) - 1)
             layer = p[target_layer]['stages']
             if len(layer) > 2:
                 layer.pop(-1)
         else:
             raise Exception()
 
-        num_param_jobs = random.randint(0, 10)
+        num_param_jobs = secrets.SystemRandom().randint(0, 10)
         for _ in range(num_param_jobs):
-            param_job = random.choice([
+            param_job = secrets.choice([
                 'pass', 
                 'sliding_window_size',
                 'sink_token_size',
@@ -442,55 +442,55 @@ def job_ga(
                 'k', 
                 'stride'
             ])
-            target_layer = random.randint(0, len(p) - 1)
+            target_layer = secrets.SystemRandom().randint(0, len(p) - 1)
             layer = p[target_layer]['stages']
-            target_stage = random.randint(0, len(layer) - 1)
+            target_stage = secrets.SystemRandom().randint(0, len(layer) - 1)
             stage = layer[target_stage]
             
             if param_job == 'pass':
                 pass
             elif param_job == 'sliding_window_size':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     p[target_layer]['sliding_window_size'] *= 2
                 else:
                     p[target_layer]['sliding_window_size'] //= 2
             elif param_job == 'sink_token_size':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     p[target_layer]['sink_token_size'] *= 2
                 else:
                     p[target_layer]['sink_token_size'] //= 2
             elif param_job == 'sa_extend_backend':
-                p[target_layer]['sa_extend_backend'] = random.choice(['streaming', 'dynamic_extend'])
+                p[target_layer]['sa_extend_backend'] = secrets.choice(['streaming', 'dynamic_extend'])
             elif param_job == 'stage_extend_backend':
-                stage.stage_extend_backend = random.choice(['streaming', 'dynamic_extend', 'relative'])
+                stage.stage_extend_backend = secrets.choice(['streaming', 'dynamic_extend', 'relative'])
             elif param_job == 'second_stage_k':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     p[target_layer]['second_stage_k'] *= 2
                 else:
                     p[target_layer]['second_stage_k'] //= 2
             elif param_job == 'block_size_q':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     stage.stage_block_size_q *= 2
                 else:
                     stage.stage_block_size_q //= 2
             elif param_job == 'block_stride_q':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     stage.stage_block_stride_q *= 2
                 else:
                     stage.stage_block_stride_q //= 2
             elif param_job == 'k':
                 if stage.stage_k is not None:
-                    if random.random() > 0.5:
+                    if secrets.SystemRandom().random() > 0.5:
                         stage.stage_k *= 2
                     else:
                         stage.stage_k //= 2
             elif param_job == 'chunk_size':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     stage.stage_chunk_size *= 2
                 else:
                     stage.stage_chunk_size //= 2
             elif param_job == 'stride':
-                if random.random() > 0.5:
+                if secrets.SystemRandom().random() > 0.5:
                     stage.stage_stride *= 2
                 else:
                     stage.stage_stride //= 2
@@ -558,7 +558,7 @@ def job_ga(
     
     def crossover(p1, p2):
         assert len(p1) == len(p2)
-        pt = random.randint(0, len(p1))
+        pt = secrets.SystemRandom().randint(0, len(p1))
         
         p1_top = p1[:pt]
         p1_bot = p2[pt:]
@@ -815,11 +815,11 @@ def job_ga(
         for _ in range(num_population):
             # more elites
             # p1, p2 = random.sample(population, counts=(len(population) - np.arange(0, len(population))).tolist(), k=2)
-            p1, p2 = random.sample(population, counts=[1, ] * len(population), k=2)
+            p1, p2 = secrets.SystemRandom().sample(population, counts=[1, ] * len(population), k=2)
             p1, p2 = crossover(p1, p2)
-            for _ in range(random.randint(0, 2) if random.random() < 0.5 else random.randint(0, 10)):
+            for _ in range(secrets.SystemRandom().randint(0, 2) if secrets.SystemRandom().random() < 0.5 else secrets.SystemRandom().randint(0, 10)):
                 p1 = mutate(p1)
-            for _ in range(random.randint(0, 2) if random.random() < 0.5 else random.randint(0, 10)):
+            for _ in range(secrets.SystemRandom().randint(0, 2) if secrets.SystemRandom().random() < 0.5 else secrets.SystemRandom().randint(0, 10)):
                 p2 = mutate(p2)
             
             p1_latency = evaluate_latency_of_candidate(model, p1)

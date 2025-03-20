@@ -1,6 +1,5 @@
 import argparse
 import gc
-import random
 import cuda.cudart
 import torch.distributed
 import tqdm
@@ -21,6 +20,7 @@ import threading
 from hip import HiPAttentionArgs, HiPAttentionOutputMetadata
 import triton
 import triton.language as tl
+import secrets
 
 torch.set_num_threads(os.cpu_count())
 
@@ -1613,7 +1613,7 @@ class Runner:
         assert refresh_interval > 0
         
         if not torch.distributed.is_initialized():
-            os.environ['MASTER_PORT'] = str(random.randint(32000, 33000))
+            os.environ['MASTER_PORT'] = str(secrets.SystemRandom().randint(32000, 33000))
             os.environ['MASTER_ADDR'] = 'localhost'
             torch.distributed.init_process_group(world_size=1, rank=0)
             vllm.distributed.init_distributed_environment(1, 0, local_rank=0)

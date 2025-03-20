@@ -1,7 +1,7 @@
 import transformers
 from torchtext.datasets import WikiText103
-import random
 import torch.multiprocessing as mp
+import secrets
 
 class FilteredWikitext:
     def __init__(self, min_length = 50):
@@ -51,43 +51,43 @@ class WikitextBatchLoader:
 
     def random_sample(self):
         #mimic GLUE
-        line = self.bank[random.randint(0, len(self.bank) - 1)].strip()
-        line2 = self.bank[random.randint(0, len(self.bank) - 1)].strip()
+        line = self.bank[secrets.SystemRandom().randint(0, len(self.bank) - 1)].strip()
+        line2 = self.bank[secrets.SystemRandom().randint(0, len(self.bank) - 1)].strip()
         #masking
         def masking_line(line):
             spl = line.split()
             for i in range(len(spl)):
-                if random.random() < 0.15:
-                    if random.random() < 0.8:
+                if secrets.SystemRandom().random() < 0.15:
+                    if secrets.SystemRandom().random() < 0.8:
                         spl[i] = '[MASK]'
                     else:
-                        spl[i] = spl[random.randint(0, len(spl)-1)]
+                        spl[i] = spl[secrets.SystemRandom().randint(0, len(spl)-1)]
             line = ' '.join(spl)
             return line
         line = masking_line(line)
         line2 = masking_line(line2)
         #random cut
-        if random.random() < 0.65: # need to re experiment
+        if secrets.SystemRandom().random() < 0.65: # need to re experiment
             spl = line.split()
             if len(spl) > 10:
-                spl = spl[:random.randint(10,len(spl))]
+                spl = spl[:secrets.SystemRandom().randint(10,len(spl))]
             line = ' '.join(spl)
         #mimic sep
-        if random.random() < 0.75:
+        if secrets.SystemRandom().random() < 0.75:
             spl = line.split()
-            sep_idx = random.randint(0, len(spl)-1)
+            sep_idx = secrets.SystemRandom().randint(0, len(spl)-1)
             spl.insert(sep_idx, "[SEP]")
-            if random.random() < 0.5:
+            if secrets.SystemRandom().random() < 0.5:
                 spl2 = line2.split()
                 spl2_patch_len = min(len(spl) - sep_idx - 1, len(spl2))
                 spl[sep_idx+1:min(sep_idx+1+spl2_patch_len, len(spl))] = spl2[:spl2_patch_len]
             line = ' '.join(spl)
         
         #end sep
-        if random.random() < 0.75:
+        if secrets.SystemRandom().random() < 0.75:
             line = line + "[SEP]"
         #mimic cls
-        if random.random() < 0.75:
+        if secrets.SystemRandom().random() < 0.75:
             line = "[CLS]"+line
         return line
 

@@ -1,5 +1,7 @@
 import gc
 import os
+import secrets
+
 if __name__ == '__main__':
     os.environ['HIP_DISABLE_AUTOTUNE'] = '1'
 
@@ -9,7 +11,7 @@ from numpy import ndarray as NdArray
 from typing import List, Union, Optional, Dict, Tuple
 import torch
 from torch import Tensor
-import math, os, time, tqdm, random
+import math, os, time, tqdm
 from hip import hip_attention_11, HiPAttentionArgs11
 from hip.models.hip_attention.attention1_block_gpu import load_checkouts, to_dense
 import matplotlib.pyplot as plt
@@ -1516,7 +1518,7 @@ def main_exp():
         mask = torch.tensor(np.clip(np.sum(mask, axis=1), 0, 1), device=0, dtype=torch.int32)
         for i in tqdm.tqdm(range(args.mask_k // args.block_size_q + 1, BDST), dynamic_ncols=True, desc='recalls', leave=False):
             for j in range(i + 1, BDST):
-                if (random.random() > (20 / (BDST - i))) and (j - i) > 16: continue
+                if (secrets.SystemRandom().random() > (20 / (BDST - i))) and (j - i) > 16: continue
                 pred = mask[:, i, :j * args.block_size_q]
                 target = mask[:, j, :j * args.block_size_q]
                 match = ((pred == target).to(torch.int32) * target).to(torch.int32)

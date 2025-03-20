@@ -21,7 +21,7 @@ import nvtx
 from torch.utils.dlpack import to_dlpack
 from torch.utils.dlpack import from_dlpack
 import cupy as cp
-import random, os
+import os
 import warnings
 import triton
 import triton.language as tl
@@ -34,6 +34,7 @@ import numpy as np
 from numpy import ndarray as NdArray
 import math
 from hip.utils.triton_argsort import argsort as tl_argsort
+import secrets
 
 def cdiv_python(a, b):
     return math.ceil(a / b)
@@ -2304,7 +2305,7 @@ def masking_iteration_draft(
             cdiv_python(TSRC, block_size_k),
             mask_block_k, 
             HID,
-            random.randint(0, 1024*1024),
+            secrets.SystemRandom().randint(0, 1024*1024),
             sample_method,
             branch_method,
             
@@ -2363,7 +2364,7 @@ def masking_iteration_draft(
                 sliding_window_size,
                 
                 G, TDST, TSRC, mask_block_k, HID,
-                random.randint(0, 1024*1024),
+                secrets.SystemRandom().randint(0, 1024*1024),
                 sample_method,
                 branch_method,
                 
