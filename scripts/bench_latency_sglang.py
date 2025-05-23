@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 import torch
+from security import safe_command
 
 n_gpus = torch.cuda.device_count()
 model = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
@@ -21,8 +22,7 @@ def run_sample(seq_len: int, batch_size: int, envs: dict):
     seq_len = seq_len * 1024
     current_chunked_prefill_size = min(seq_len, chunked_prefill_size)
 
-    subprocess.call(
-        (
+    safe_command.run(subprocess.call, (
             f"python -m sglang.bench_latency --model-path {model} --context-length {seq_len + 1024} "
             f"--batch {batch_size} --input-len {seq_len} --output-len {256} --tp-size {n_gpus} "
             f"--mem-fraction-static 0.7 --enable-p2p-check --chunked-prefill-size {current_chunked_prefill_size} "

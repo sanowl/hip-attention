@@ -4,6 +4,8 @@ import os, json
 from matplotlib import pyplot as plt
 import seaborn as sns
 from hip.utils import setup_seaborn
+from security import safe_command
+
 setup_seaborn(legend_fontsize=6)
 
 dups = range(1, 17)
@@ -57,7 +59,7 @@ def samples(query_size = 1, step_size = 1):
                 '--refresh_interval', str(refresh_interval),
             ]
             print(' '.join(cmd))
-            subprocess.call(cmd)
+            safe_command.run(subprocess.call, cmd)
             with open(cache_path, 'r') as f:
                 latency_hip = json.load(f)['mean']
             os.remove(cache_path)

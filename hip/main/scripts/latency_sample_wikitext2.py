@@ -3,6 +3,7 @@ import json
 import os
 from dataclasses import dataclass, asdict
 from typing import Literal
+from security import safe_command
 
 @dataclass
 class Config:
@@ -100,7 +101,7 @@ def sample():
         else:
             raise Exception()
         print(' '.join(cmd))
-        subprocess.call(cmd)
+        safe_command.run(subprocess.call, cmd)
 
         with open(cache_path, 'r') as f:
             latency = json.load(f)['mean']

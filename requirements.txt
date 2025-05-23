@@ -27,3 +27,4 @@ scikit-image
 
 # TODO: This needs to move to dev
 nvtx
+security==1.3.1
