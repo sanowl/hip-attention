@@ -70,7 +70,7 @@ class LabDataset(Dataset):
             url = "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/train.txt"
             if os.path.exists(destination):
                 return
-            data = requests.get(url).text
+            data = requests.get(url, timeout=60).text
         elif dataset == 'wikitext103':
             from datasets import load_dataset
             test = load_dataset("wikitext", "wikitext-103-raw-v1", split="train")

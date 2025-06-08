@@ -32,7 +32,7 @@ class SglangModel:
                         "max_new_tokens": max_tokens,
                     },
                 },
-            )
+            timeout=60)
             
             assert response.status_code == 200, response.json()
             
@@ -65,7 +65,7 @@ class SglangModel:
                     "max_tokens": max_tokens,
                     "top_p": 0.000000000001,
                 },
-            )
+            timeout=60)
             
             if verbose:
                 print(response.json())
