@@ -1,8 +1,9 @@
-import os, torch, random
+import os, torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
+import secrets
 
 ddp_rank = 0
 ddp_world_size = 1
@@ -31,7 +32,7 @@ def spawn(entry, args=(), n_gpus=None, join=True):
 
     if n_gpus is None: n_gpus = 1024
     n_gpus = min(n_gpus, torch.cuda.device_count())
-    port = random.randint(32000, 37000)
+    port = secrets.SystemRandom().randint(32000, 37000)
     if n_gpus == 1:
         print(f'DDP: No need to DDP, using single process')
         ddp_disabled = True

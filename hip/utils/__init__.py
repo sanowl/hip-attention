@@ -5,7 +5,7 @@ import threading
 from typing import Dict, List, TextIO, Tuple
 import numpy as np
 import torch
-import random
+import secrets
 
 # from .profiler import Profiler
 
@@ -34,7 +34,7 @@ def seed(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     np.random.seed(seed)
-    random.seed(seed)
+    secrets.SystemRandom().seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed) # if use multi-GPU
     os.environ["PYTHONHASHSEED"] = str(seed)
